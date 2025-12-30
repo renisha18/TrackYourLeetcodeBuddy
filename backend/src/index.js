@@ -12,6 +12,10 @@ function generateVerificationCode() {
   return "LC-VERIFY-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+const verifyAccount = async () => {
+  alert("Bio verification coming next!");
+};
+
 // routes BELOW
 app.post("/api/auth/verify-username", async (req, res) => {
   const { username } = req.body;
@@ -66,6 +70,44 @@ app.post("/api/auth/generate-code", (req, res) => {
   });
 });
 
+app.post("/api/auth/verify-bio", async (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+    return res.status(400).json({ message: "Username required" });
+  }
+
+  const storedData = verificationStore[username];
+
+  if (!storedData) {
+    return res.status(400).json({ message: "No verification code found. Generate again." });
+  }
+
+  try {
+    const response = await axios.get(
+      `https://alfa-leetcode-api.onrender.com/${username}`
+    );
+
+    const bio = response.data?.about || response.data?.profile?.about || "";
+
+    if (bio.includes(storedData.code)) {
+      return res.json({
+        verified: true,
+        message: "LeetCode account verified successfully"
+      });
+    } else {
+      return res.status(400).json({
+        verified: false,
+        message: "Verification code not found in bio"
+      });
+    }
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error verifying LeetCode bio"
+    });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Backend is working");

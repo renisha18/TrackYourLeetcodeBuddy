@@ -31,6 +31,30 @@ export default function Register() {
 }
   };
 
+ const verifyOwnership = async () => {
+  try {
+    const res = await axios.post(
+      "http://localhost:5001/api/auth/verify-bio",
+      { username }
+    );
+
+    alert(res.data.message);
+
+    if (res.data.verified) {
+      // NEXT STEP: allow password setup or redirect
+      console.log("User verified");
+    }
+
+  } catch (err) {
+    if (err.response && err.response.data) {
+      alert(err.response.data.message);
+    } else {
+      alert("Verification failed. Try again.");
+    }
+  }
+};
+
+
   return (
     <div>
       {step === 1 && (
@@ -50,7 +74,7 @@ export default function Register() {
           <p>Paste this code into your LeetCode bio:</p>
           <strong>{verificationCode}</strong>
           <p>After adding it, click Verify Again</p>
-          <button onClick={verifyAccount}> Verify </button>
+          <button onClick={verifyOwnership}> Verify </button>
         </>
       )}
     </div>
