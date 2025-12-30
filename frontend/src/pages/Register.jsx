@@ -5,6 +5,7 @@ export default function Register() {
   const [username, setUsername] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [step, setStep] = useState(1);
+  const [password, setPassword] = useState("");
 
   const verifyUsername = async () => {
     try {
@@ -41,8 +42,8 @@ export default function Register() {
     alert(res.data.message);
 
     if (res.data.verified) {
-      // NEXT STEP: allow password setup or redirect
-      console.log("User verified");
+        console.log("Acc verified!")
+      setStep(3);
     }
 
   } catch (err) {
@@ -50,6 +51,25 @@ export default function Register() {
       alert(err.response.data.message);
     } else {
       alert("Verification failed. Try again.");
+    }
+  }
+};
+
+const setUserPassword = async () => {
+  try {
+    const res = await axios.post(
+      "http://localhost:5001/api/auth/set-password",
+      { username, password }
+    );
+
+    alert("Account created!");
+    localStorage.setItem("token", res.data.token);
+
+  } catch (err) {
+    if (err.response && err.response.data) {
+      alert(err.response.data.message);
+    } else {
+      alert("Server error");
     }
   }
 };
@@ -77,6 +97,17 @@ export default function Register() {
           <button onClick={verifyOwnership}> Verify </button>
         </>
       )}
+      {step === 3 && (
+  <>
+    <h3>Set Password</h3>
+    <input
+      type="password"
+      placeholder="Create password"
+      onChange={(e) => setPassword(e.target.value)}
+    />
+    <button onClick={setUserPassword}>Create Account</button>
+  </>
+)}
     </div>
   );
 }
